@@ -3,6 +3,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import yfinance as yf
 
+def get_index_data(index_of_choice):
+    # Find the mean daily Return of NDX and it's standard deviation
+    index_df = yf.download(index_of_choice, auto_adjust=False)
+
+    # Log is used to normalize the daily returns
+    index_returns = np.log(1 + index_df['Adj Close'].pct_change())
+
+    index_mu, index_sigma = index_returns.mean(), index_returns.std()
+    
+    return index_mu, index_sigma
+
+
 def brown_motion_drift(start_price, mu, sigma, runtime, n_simul):
     sim_returns = np.random.normal(mu, sigma, 
                                 size=(runtime, n_simul))
@@ -187,17 +199,12 @@ if __name__ == "__main__":
     withdrawel_rate = 0.08
 
     # Find the mean daily Return of NDX and it's standard deviation
-    ndx_df = yf.download("NDX", auto_adjust=False)
+    index_of_choice = "NDX"
 
-    # Log is used to normalize the daily returns
-    ndx_returns = np.log(1 + ndx_df['Adj Close'].pct_change())
 
-    ndx_mu, ndx_sigma = ndx_returns.mean(), ndx_returns.std()
+    ndx_mu, ndx_sigma = get_index_data(index_of_choice)
 
-    sim_prices = brown_motion_drift(start_price, ndx_mu, ndx_sigma, runtime, n_simul)
-
-    # plt.plot(sim_prices, linewidth=0.25)
-    # plt.show()
+   
 
 
     stock_prices, withdrawal_returns = brown_motion_drift_plus_wd(start_price, ndx_mu, ndx_sigma, 
