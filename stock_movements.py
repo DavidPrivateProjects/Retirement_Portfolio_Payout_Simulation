@@ -1,8 +1,8 @@
+# %%
 # All imports
 import numpy as np
 import matplotlib.pyplot as plt
 import yfinance as yf
-
 
 def get_index_data(index_of_choice):
     # Find the mean daily Return of NDX and it's standard deviation
@@ -14,6 +14,15 @@ def get_index_data(index_of_choice):
     index_mu, index_sigma = index_returns.mean(), index_returns.std()
     
     return index_mu, index_sigma
+
+
+def total_withdrawels_before_loss(withdrawal_returns, portfolio_loss_idx, n_simul):
+    result = []
+
+    for i in range(n_simul):
+        result.append(withdrawal_returns[portfolio_loss_idx[i], i])
+
+    return np.array(result)
 
 
 def brown_motion_drift(start_balance, mu, sigma, runtime, n_simul):
@@ -171,79 +180,66 @@ def plot_stock_with_loss_point(stock_prices, n_simul,
 
     plt.show()
 
+if __name__ == "__main__":
 
-start_balance = 100
-
-
-# Stockdays per year
-days_per_year = 252
+    # Start price of the simulation!
+    start_balance = 100
 
 
-# Total number of simulations
-n_simul = 500
-
-# Simulation years
-sim_years = 30
-
-# Runtime in days
-runtime = days_per_year * sim_years - 1
-
-# Withdrawal rate is yearly and after the first year!
-yearly_withdrawels = True # If false, then monthly withdrawals
-withdraw_after_first_year = True # If false, withdrawal starts with the simulation
+    # Stockdays per year
+    days_per_year = 252
 
 
-# Money is taken out of the account after one year
-withdrawel_rate = 0.08
+    # Total number of simulations
+    n_simul = 500
+
+    # Simulation years
+    sim_years = 30
+
+    # Runtime in days
+    runtime = days_per_year * sim_years - 1
+
+    # Withdrawal rate is yearly and after the first year!
+    yearly_withdrawels = True # If false, then monthly withdrawals
+    withdraw_after_first_year = True # If false, withdrawal starts with the simulation
 
 
-index_of_choice = "NDX"
+    # Money is taken out of the account after one year
+    withdrawel_rate = 0.08
 
 
-ndx_mu, ndx_sigma = get_index_data(index_of_choice)
-
-sim_prices = brown_motion_drift(start_balance, ndx_mu, ndx_sigma, runtime, n_simul)
-
-# plt.plot(sim_prices, linewidth=0.25)
-# plt.show()
+    index_of_choice = "NDX"
 
 
-stock_prices, withdrawal_returns = brown_motion_drift_plus_wd(start_balance, ndx_mu, ndx_sigma, 
-                                                              runtime, n_simul, days_per_year,
-                                                              sim_years, withdrawel_rate,
-                                                              yearly_withdrawels=True,
-                                                              withdraw_after_first_year=False)
+    ndx_mu, ndx_sigma = get_index_data(index_of_choice)
 
-# plt.plot(stock_prices)
-# plt.show()
+    sim_prices = brown_motion_drift(start_balance, ndx_mu, ndx_sigma, runtime, n_simul)
 
-#stock_prices[1800:1900, 7]
+    # plt.plot(sim_prices, linewidth=0.25)
+    # plt.show()
 
-portfolio_is_lost, portfolio_loss_idx = find_zero_points(stock_prices, n_simul)
+    stock_prices, withdrawal_returns = brown_motion_drift_plus_wd(start_balance, ndx_mu, ndx_sigma, 
+                                                                runtime, n_simul, days_per_year,
+                                                                sim_years, withdrawel_rate,
+                                                                yearly_withdrawels=True,
+                                                                withdraw_after_first_year=False)
+    
 
-def total_withdrawels_before_loss(withdrawal_returns, portfolio_loss_idx, n_simul):
-    result = []
+    # plt.plot(stock_prices)
+    # plt.show()
 
-    for i in range(n_simul):
-        result.append(withdrawal_returns[portfolio_loss_idx[i], i])
+    portfolio_is_lost, portfolio_loss_idx = find_zero_points(stock_prices, n_simul)
+    tot_w_before_loss = total_withdrawels_before_loss(withdrawal_returns, portfolio_loss_idx, n_simul)
 
-    return np.array(result)
+    # print(loss_probability(portfolio_is_lost))
+    # print(average_loss_point(portfolio_loss_idx) / 252)
+        
 
-tot_w_before_loss = total_withdrawels_before_loss(withdrawal_returns, portfolio_loss_idx, n_simul)
-
-tot_w_before_loss
-
-# print(loss_probability(portfolio_is_lost))
-# print(average_loss_point(portfolio_loss_idx) / 252)
-
-plot_stock_with_loss_point(stock_prices, n_simul,
-                           portfolio_loss_idx)
+    plot_stock_with_loss_point(stock_prices, n_simul,
+                               portfolio_loss_idx)
 
 # Notes David:
 # Make the inflation fixed
-# Calculate total withdrawals made during the time!
-# Start working on dinamic plot
-
 
 
 
