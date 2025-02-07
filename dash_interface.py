@@ -1,5 +1,6 @@
 # Source Link for further steps: https://github.com/Coding-with-Adam/Dash-by-Plotly/blob/master/Other/Dash_Introduction/intro.py
 
+# Notes, include a FAQ at the end of the page where you answer questions such as: 1.) Why does the year only include 252 days?
 
 
 import pandas as pd

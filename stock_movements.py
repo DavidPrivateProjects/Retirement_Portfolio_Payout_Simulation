@@ -1,8 +1,9 @@
-# %%
+
 # All imports
 import numpy as np
 import matplotlib.pyplot as plt
 import yfinance as yf
+
 
 def get_index_data(index_of_choice):
     # Find the mean daily Return of NDX and it's standard deviation
@@ -77,11 +78,15 @@ def average_total_withdrawels(tot_withdrawels_before_loss):
 
 
 def brown_motion_drift_plus_wd(start_balance, mu, sigma, 
-                               runtime, n_simul, days_per_year,
+                               n_simul,
                                sim_years, withdrawel_rate, 
                                yearly_withdrawels,
-                               withdraw_after_first_year):
+                               withdraw_after_first_year,
+                               days_per_year=252):
     
+    runtime = sim_years * days_per_year - 1
+
+
     sim_returns = np.random.normal(mu, sigma, 
                                 size=(runtime, n_simul))
 
@@ -124,10 +129,13 @@ def brown_motion_drift_plus_wd(start_balance, mu, sigma,
 
 
 def brown_motion_drift_plus_wd(start_balance, mu, sigma, 
-                               runtime, n_simul, days_per_year,
+                               n_simul,
                                sim_years, withdrawel_rate,
                                yearly_withdrawels,
-                               withdraw_after_first_year):
+                               withdraw_after_first_year,
+                               days_per_year=252):
+    
+    runtime = sim_years * days_per_year - 1
     
     sim_returns = np.random.normal(mu, sigma, 
                                 size=(runtime, n_simul))
@@ -219,10 +227,11 @@ if __name__ == "__main__":
     # plt.show()
 
     stock_prices, withdrawal_returns = brown_motion_drift_plus_wd(start_balance, ndx_mu, ndx_sigma, 
-                                                                runtime, n_simul, days_per_year,
-                                                                sim_years, withdrawel_rate,
-                                                                yearly_withdrawels=True,
-                                                                withdraw_after_first_year=False)
+                                                                  n_simul,
+                                                                  sim_years, withdrawel_rate,
+                                                                  yearly_withdrawels=True,
+                                                                  withdraw_after_first_year=False,
+                                                                  days_per_year=252)
     
 
     # plt.plot(stock_prices)
