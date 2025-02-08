@@ -1,6 +1,4 @@
-
 # Data Sources: World Health Organization (WHO) Global Health Observatory Data / http://pophealthmetrics.biomedcentral.com/articles/10.1186/s12963-016-0094-0#Sec7
-
 
 import pandas as pd
 from scipy import stats
@@ -49,24 +47,6 @@ def surv_decision(prob):
     return random.random() < prob
 
 
-def survival_arr_years(sim_years, country, age, sex):
-    year = 0
-    res_array = []
-    life_slope, life_intercept, life_std = get_life_exp_vals(country, sex)
-    
-    while year < sim_years:
-        prob, age = surv_prob_next_year(age, life_slope, life_intercept, life_std)    
-        res = surv_decision(prob)
-        if res == False:
-            res_array.extend([False] * (sim_years - year))
-            return res_array
-        else:
-            res_array.append(True)
-            year += 1
-
-    return res_array
-
-
 def survival_arr_m(sim_years, age, life_slope, life_intercept, life_std):
     
     res_arr = []
@@ -91,8 +71,6 @@ def survival_arr_m(sim_years, age, life_slope, life_intercept, life_std):
     return res_arr 
 
 
-
-
 def survival_sim(sim_years, country, age, sex, sim_n):
     res_array = []
     life_slope, life_intercept, life_std = get_life_exp_vals(country, sex)
@@ -103,40 +81,12 @@ def survival_sim(sim_years, country, age, sex, sim_n):
 
     res_array = np.array(res_array)
     return  np.transpose(res_array)
-            
 
-if __name__ == "__main__":
-
-    country = 'United States of America'
-    sex = 'Male'
-    age = 80.0
-    life_slope, life_intercept, life_std = get_life_exp_vals(country, sex)
-    sim_n = 500
-    sim_years = 15
-
-
-    surr_arr_y = survival_arr_years(sim_years, country, age, sex)
-
-
-    surr_arr_m = survival_sim(sim_years, country, age, sex, sim_n)
-
-
-    surr_arr_m.shape
-
-    15 * 12
-
-    surr_arr_m[:, 15]
-
-    life_slope, life_intercept, life_std = get_life_exp_vals(country, sex)
-    curr_res = np.array(survival_arr_m(sim_years, age, life_slope, life_intercept, life_std))
-
-    curr_res
-
-    surr_arr_m = np.transpose(surr_arr_m)
-
-    surr_arr_m[:, 10]
-
-
+def death_ind(surr_arr):
+    res = np.where(surr_arr == False)[0]
+    if len(res) == 0:
+        return -1
+    return res[0]
 
 
 
