@@ -5,6 +5,26 @@ from scipy import stats
 import random
 import numpy as np
 
+
+
+def get_countries():
+    # load WHO longevity data
+    life_exp_data = pd.read_csv('https://apps.who.int/gho/athena/data/GHO/WHOSIS_000001,WHOSIS_000015?filter=COUNTRY:*&x-sideaxis=COUNTRY;YEAR&x-topaxis=GHO;SEX&profile=verbose&format=csv')
+    # Keep only useful features fix case display of country text
+    life_exp_data = life_exp_data[["GHO (DISPLAY)", "YEAR (CODE)", "COUNTRY (DISPLAY)", 
+                                   "SEX (DISPLAY)", "Numeric"]]
+    
+    sub_data_male = life_exp_data[life_exp_data['SEX (DISPLAY)'] == "Male"]
+    sub_data_female = life_exp_data[life_exp_data['SEX (DISPLAY)'] == "Female"]
+
+    unique_m_countries = sub_data_male['COUNTRY (DISPLAY)'].unique()
+    unique_f_countries = sub_data_female['COUNTRY (DISPLAY)'].unique()
+
+    unique_countries = np.intersect1d(unique_m_countries, unique_f_countries)
+
+    return unique_countries
+
+
 def get_life_exp_vals(country, sex,
                         STD_MALES=5.6, STD_FEMALES=3.6):
     # load WHO longevity data
