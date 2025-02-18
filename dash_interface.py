@@ -73,7 +73,7 @@ app.layout = html.Div([
         # Balance choice
         html.Label(['Start Balance'], style={'font-weight' : 'bold', 'text-align' : 'center'}),
         dcc.Input(id='balance', type='number', placeholder=100000,
-                  min=0),
+                  min=0, value=100000),
         html.Br(),
 
         # Index choice
@@ -90,13 +90,23 @@ app.layout = html.Div([
         # Withdrawal rate choice
         html.Label(['Withdrawal rate'], style={'font-weight' : 'bold', 'text-align' : 'center'}),
         dcc.Input(id='wd_rate', type='number', placeholder=0.1,
-                  min=0, max=1, step=0.1),
+                  min=0, max=1, step=0.1, value=0.1),
+        html.Br(),
+
+        # Simulation years choice
+        html.Label(['Simulation Years'], style={'font-weight' : 'bold', 'text-align' : 'center'}),
+        dcc.Input(id='sim_years', type='number', 
+                  placeholder=5, min=1, max=100, step=1, value=5),
+        html.Br(),
+
+        # Number of simulations choice
+        html.Label(['Number of Simulations'], style={'font-weight' : 'bold', 'text-align' : 'center'}),
+        dcc.Input(id='sim_n', type='number',
+                  placeholder=5, min=1, max=10000, step=1, value=5),
         html.Br(),
 
 
     ]),
-
-    
 
     
     dcc.Markdown(children='', id='displayed_text'),
@@ -112,17 +122,43 @@ app.layout = html.Div([
     Output('displayed_text', 'children'),
     Input('age', component_property='value'),
     Input('sex', component_property='value'),
-    Input('country', component_property='value')
+    Input('country', component_property='value'),
+    Input('balance', component_property='value'),
+    Input("wd_rate", component_property='value')
 )
 
-def update_text(age, sex, country):
-    print(type(age))
-    print(type(sex))
-    print(type(country))
-    return f"The values chosen by the user are: age: {age}, sex: {sex}, country: {country}"
+def update_text(age, sex, country, balance, wd_rate):
+    return f"The values chosen by the user are: age: {age}, sex: {sex}, country: {country}, balance: {balance}, withdrawal_rate: {wd_rate}"
 
 
+# Update the graph!
+@callback(
+    Output('simulation', 'figure'),
+    Input('age', 'value'),
+    Input('sex', 'value'),
+    Input('country', 'value'),
+    Input('balance', 'value'),
+    Input("wd_rate", 'value'),
+    Input("index", "value"),
+    Input("sim_years", "value"),
+    Input("sim_n", "value")
+)
+def update_graph(age, sex, country, balance, wd_rate, index, sim_years, sim_n):
+    index_mu, index_sigma = sm.get_index_data(index)
 
+    balances, withdrawal_returns = sm.brown_motion_drift_plus_wd(balance, index_mu, index_sigma, 
+                                                                sim_n,
+                                                                sim_years, wd_rate,
+                                                                yearly_withdrawels=True,
+                                                                withdraw_after_first_year=False)
+    portfolio_is_lost, portfolio_loss_idx = sm.find_zero_points(balances, sim_n)
+    tot_w_before_loss = sm.total_withdrawels_before_loss(withdrawal_returns, portfolio_loss_idx, sim_n)
+
+    # survival_arr = lf.survival_sim(sim_years, country, age, sex, sim_n)
+
+    graph = None
+
+    return graph
 
 if __name__ == "__main__":
     app.run_server(debug=True)
