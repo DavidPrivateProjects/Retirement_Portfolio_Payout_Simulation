@@ -5,12 +5,17 @@
 
 # Notes, include a FAQ at the end of the page where you answer questions such as: 1.) Why does the year only include 252 days?
 
+# Next steps: include a callback function for the table!
+# Adjust the layout, so it works for all screen sizes not just extra large!
+# Include a Collabse to hide Country & Gender info, but the user can change them!
+# Make the design very beautiful!
 
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from dash import Dash, dcc, html, Input, Output, callback
+from dash import Dash, dcc, html, Input, Output, callback, dash_table
+import dash_bootstrap_components as dbc
 
 import life_expectancy as lf
 import stock_movements as sm
@@ -18,17 +23,16 @@ import stock_movements as sm
 country_options = lf.get_countries()
 index_options = ['NDX', 'SPX']
 
+# Precalculated Results
+df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
 
-app = Dash(__name__)
 
-
+app = Dash(__name__, external_stylesheets=[dbc.themes.SANDSTONE])
 
 # App layout
 app.layout = html.Div([
-
-
-
-    html.H1("Retirement Portfolio Withdrawal Rate Simulation", style={'text-align' : 'center'}),
+    dbc.Row(dbc.Col(html.H1("Retirement Portfolio \nWithdrawal Simulation"),
+                    width={'size' : "auto", 'offset' : 3})),
 
     html.Div(children=[
         
@@ -110,11 +114,16 @@ app.layout = html.Div([
 
     
     dcc.Markdown(children='', id='displayed_text'),
-
-
     html.Br(),
-    dcc.Graph(id='simulation', figure={})
 
+
+    # Table showing the aggregated results
+    dash_table.DataTable(id="res_table", data=df.to_dict('records')),
+    html.Br(),
+    
+    # Graph showing the advanced Simulations for further analysis
+    dcc.Graph(id='simulation', figure={}),
+    html.Br(),
 
 ])
 
