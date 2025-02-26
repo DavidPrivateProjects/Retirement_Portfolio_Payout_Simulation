@@ -16,11 +16,14 @@ import plotly.graph_objects as go
 
 from dash import Dash, dcc, html, Input, Output, callback, dash_table
 import dash_bootstrap_components as dbc
+from dash_bootstrap_templates import load_figure_template
 
 import life_expectancy as lf
 import stock_movements as sm
 
-country_options = lf.get_countries()
+
+#country_options = lf.get_countries()
+country_options = ["America", "Switzerland"]
 index_options = ['NDX', 'SPX']
 
 # Precalculated Results
@@ -28,106 +31,153 @@ df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapmi
 
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.SANDSTONE])
+load_figure_template("SANDSTONE")
 
-# App layout
-app.layout = html.Div([
-    dbc.Row(dbc.Col(html.H1("Retirement Portfolio \nWithdrawal Simulation"),
-                    width={'size' : "auto", 'offset' : 3})),
 
-    html.Div(children=[
-        
-        # Age choice
-        html.Label(["Age:"], style={'font-weight' : 'bold', 'text-align' : 'center'}),
-        dcc.Dropdown(
+# the style arguments for the sidebar. We use position:fixed and a fixed width
+STYLE_SIDE_CONTENT_L = {
+    "top" : 0,
+    "left" : 0,
+    "bottom" : 0,
+    "text-align" : "left",
+    "width" : "14rem",
+}
+STYLE_SIDE_CONTENT_R = {
+    "top" : 0,
+    "left" : 0,
+    "bottom" : 0,
+    "text-align" : "center",
+    "width" : "5rem",
+}
+SIDEBAR_STYLE = {
+    "top": 0,
+    "left": 0,
+    "bottom": 0,
+    "width": "28rem",
+    "background-color": "#f8f9fa",
+    'margin-left':'3px', 
+    'margin-top':'15px'
+}
+
+CONTENT_STYLE = {
+    "margin-left": '5px',
+    "margin-right": '5px',
+    #"padding": "2rem 1rem"
+}
+
+
+sidebar = html.Div(
+    [
+        html.H2("Filters", style={"text-align": "center"}),
+        html.Br(),
+        dbc.Row([
+            dbc.Col([html.Label(["Portfolio Size: "], style=STYLE_SIDE_CONTENT_L)]),
+            dbc.Col([dcc.Input(id='balance', type='number', placeholder=100000,
+                      min=0, value=100000, style=STYLE_SIDE_CONTENT_R)])
+        ]),
+        dbc.Row([
+            dbc.Col([html.Label(["Yearly Withdrawal Rate: "], style=STYLE_SIDE_CONTENT_L)]),
+            dbc.Col([dcc.Input(id='wd_rate', type='number', placeholder=0.1,
+                      min=0, max=1, step=0.1, value=0.1,
+                      style=STYLE_SIDE_CONTENT_R)])
+        ]),
+        dbc.Row([
+            dbc.Col([html.Label(["Age: "], style=STYLE_SIDE_CONTENT_L)]),
+            dbc.Col([dcc.Dropdown(
                     id="age",
                     options=[x for x in range(1, 120)],
                     value=62,
                     clearable=False,
                     searchable=False,
-                    ),
-        html.Br(),
-
-        # Sex choice
-        html.Label(["Sex:"], style={'font-weight' : 'bold', 'text-align' : 'center'}),
-        dcc.Dropdown(
-                    id="sex",
-                    options=["Male", "Female"],
-                    value="Male",
-                    clearable=False,
-                    searchable=False,
-                    ),
-        html.Br(),
-
-        # Country choice
-        html.Label(["Country:"], style={'font-weight' : 'bold', 'text-align' : 'center'}),
-        dcc.Dropdown(
+                    style=STYLE_SIDE_CONTENT_R),])
+        ]),
+        dbc.Row([
+            dbc.Col([html.Label(["Country of Residence: "], style=STYLE_SIDE_CONTENT_L)]),
+            dbc.Col([dcc.Dropdown(
                     id="country",
                     options=country_options,
                     value="Switzerland",
                     clearable=False,
                     searchable=True,
-                    ),
-        html.Br(),
-        
-    ],style={'padding' : 10, 'flex' : 1}), 
+                    style=STYLE_SIDE_CONTENT_R,)])
+        ]),
+        dbc.Row([
+            dbc.Col([html.Label(["Sex: "], style=STYLE_SIDE_CONTENT_L)]),
+            dbc.Col([dcc.Dropdown(
+                    id="sex",
+                    options=["Male", "Female"],
+                    value="Male",
+                    clearable=False,
+                    searchable=False,
+                    style=STYLE_SIDE_CONTENT_R,)]),
+        ]),
 
-
-    html.Div(children=[
-        
-        # Balance choice
-        html.Label(['Start Balance'], style={'font-weight' : 'bold', 'text-align' : 'center'}),
-        dcc.Input(id='balance', type='number', placeholder=100000,
-                  min=0, value=100000),
-        html.Br(),
-
-        # Index choice
-        html.Label(['Index:'], style={'font-weight' : 'bold', 'text-align' : 'center'}),
-        dcc.Dropdown(
+        dbc.Row([
+            dbc.Col([html.Label(["Index Choice: "], style=STYLE_SIDE_CONTENT_L)]),
+            dbc.Col([dcc.Dropdown(
                     id="index",
                     options=index_options,
                     value="NDX",
                     clearable=False,
                     searchable=True,
-                    ),
-        html.Br(),
-
-        # Withdrawal rate choice
-        html.Label(['Withdrawal rate'], style={'font-weight' : 'bold', 'text-align' : 'center'}),
-        dcc.Input(id='wd_rate', type='number', placeholder=0.1,
-                  min=0, max=1, step=0.1, value=0.1),
-        html.Br(),
-
-        # Simulation years choice
-        html.Label(['Simulation Years'], style={'font-weight' : 'bold', 'text-align' : 'center'}),
-        dcc.Input(id='sim_years', type='number', 
-                  placeholder=5, min=1, max=100, step=1, value=5),
-        html.Br(),
-
-        # Number of simulations choice
-        html.Label(['Number of Simulations'], style={'font-weight' : 'bold', 'text-align' : 'center'}),
-        dcc.Input(id='sim_n', type='number',
-                  placeholder=5, min=1, max=10000, step=1, value=5),
-        html.Br(),
+                    style=STYLE_SIDE_CONTENT_R)]),
+        ]),
 
 
-    ]),
+        dbc.Row([
+            dbc.Col([html.Label(["Number of Simulations: "], style=STYLE_SIDE_CONTENT_L)]),
+            dbc.Col([dcc.Input(id='sim_n', type='number',
+                  placeholder=5, min=1, max=10000, step=1, value=5,
+                    style=STYLE_SIDE_CONTENT_R)]),
+        ]),
 
+        dbc.Row([
+            dbc.Col([html.Label(["Years to be Simulated: "], style=STYLE_SIDE_CONTENT_L)]),
+            dbc.Col([dcc.Input(id='sim_years', type='number', 
+                  placeholder=5, min=1, max=100, step=1, value=5,
+                  style=STYLE_SIDE_CONTENT_R)]),
+        ]),
+
+    ],
+    style=SIDEBAR_STYLE,
+)
+
+
+
+# App layout
+app.layout = html.Div([
+
+    dbc.Row(
+        dbc.Col(html.H1("Retirement Portfolio \nWithdrawal Simulation"),
+                    width={'size' : "auto", 'offset' : 0}
+        
+        )
     
-    dcc.Markdown(children='', id='displayed_text'),
-    html.Br(),
+    , justify="center", style = {'margin-left':'15px', 'margin-top':'15px'}),
+    
+    dbc.Row([
+        sidebar,
+        
+        dbc.Col([
+            # Graph showing the advanced Simulations for further analysis
+            dcc.Graph(id='simulation', figure={}),
+        ], width={'size' : "auto", 'offset' : 0}),
+
+       
+        
+    ]),
 
 
     # Table showing the aggregated results
     dash_table.DataTable(id="res_table", data=df.to_dict('records')),
     html.Br(),
     
-    # Graph showing the advanced Simulations for further analysis
-    dcc.Graph(id='simulation', figure={}),
+    
     html.Br(),
 
 ])
 
-@callback(
+"""@callback(
     Output('displayed_text', 'children'),
     Input('age', component_property='value'),
     Input('sex', component_property='value'),
@@ -138,10 +188,10 @@ app.layout = html.Div([
 
 def update_text(age, sex, country, balance, wd_rate):
     return f"The values chosen by the user are: age: {age}, sex: {sex}, country: {country}, balance: {balance}, withdrawal_rate: {wd_rate}"
-
+"""
 
 # Update the graph!
-@callback(
+"""@callback(
     Output('simulation', 'figure'),
     Input('age', 'value'),
     Input('sex', 'value'),
@@ -167,7 +217,7 @@ def update_graph(age, sex, country, balance, wd_rate, index, sim_years, sim_n):
 
     graph = None
 
-    return graph
+    return graph"""
 
 if __name__ == "__main__":
     app.run_server(debug=True)
