@@ -33,30 +33,51 @@ df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapmi
 app = Dash(__name__, external_stylesheets=[dbc.themes.SANDSTONE])
 load_figure_template("SANDSTONE")
 
+# SOURCE: https://community.plotly.com/t/holy-grail-layout-with-dash-bootstrap-components/40818/2
+header_height, footer_height = "6rem", "5rem"
+sidebar_width, adbar_width = "12rem", "12rem"
+
+STYLE_HEADER = {
+    "position" : "fixed",
+    "top" : 0,
+    "left" : 0,
+    "right" : 0,
+    "height" : header_height,
+    "padding" : "2rem 1rem",
+    "background-color" : "white",
+    "text-align" : "center",
+}
+
+SIDEBAR_STYLE = {
+    "position" : "fixed",
+    "top": header_height,
+    "left": 0,
+    "bottom": footer_height,
+    "width": sidebar_width,
+    "background-color": "#7C6F66",
+    #"padding": "1rem 1rem",
+}
 
 # the style arguments for the sidebar. We use position:fixed and a fixed width
-STYLE_SIDE_CONTENT_L = {
-    "top" : 0,
-    "left" : 0,
-    "bottom" : 0,
-    "text-align" : "left",
-    "width" : "14rem",
-}
-STYLE_SIDE_CONTENT_R = {
-    "top" : 0,
-    "left" : 0,
-    "bottom" : 0,
+DROPDOWN_STYLE = {
+    "width": "6.5rem",
     "text-align" : "center",
-    "width" : "5rem",
+    "height" : "1.9rem",
+    #"marginLeft": "1.4rem",
+    "display": "inline-block"
 }
-SIDEBAR_STYLE = {
-    "top": 0,
-    "left": 0,
-    "bottom": 0,
-    "width": "28rem",
-    "background-color": "#f8f9fa",
-    'margin-left':'3px', 
-    'margin-top':'15px'
+INPUT_STYLE = {
+    "width": "6.5rem",
+    "text-align" : "center",
+    "height" : "1.8rem",
+    #"marginLeft": "2.7rem",
+}
+SIDEBAR_CONTENT_STYLE = {
+    "width": "12rem",
+    "text-align" : "center"}
+
+FOOTER_STYLE = {
+    "position" : "fixed",
 }
 
 CONTENT_STYLE = {
@@ -69,113 +90,112 @@ CONTENT_STYLE = {
 sidebar = html.Div(
     [
         html.H2("Filters", style={"text-align": "center"}),
-        html.Br(),
-        dbc.Row([
-            dbc.Col([html.Label(["Portfolio Size: "], style=STYLE_SIDE_CONTENT_L)]),
-            dbc.Col([dcc.Input(id='balance', type='number', placeholder=100000,
-                      min=0, value=100000, style=STYLE_SIDE_CONTENT_R)])
-        ]),
-        dbc.Row([
-            dbc.Col([html.Label(["Yearly Withdrawal Rate: "], style=STYLE_SIDE_CONTENT_L)]),
-            dbc.Col([dcc.Input(id='wd_rate', type='number', placeholder=0.1,
-                      min=0, max=1, step=0.1, value=0.1,
-                      style=STYLE_SIDE_CONTENT_R)])
-        ]),
-        dbc.Row([
-            dbc.Col([html.Label(["Age: "], style=STYLE_SIDE_CONTENT_L)]),
-            dbc.Col([dcc.Dropdown(
+        
+        html.Div([
+            html.Label(["Portfolio Size:"]),
+        ], style=SIDEBAR_CONTENT_STYLE),
+        
+        html.Div([
+            dcc.Input(id='balance', value="100'000 USD",
+                    style=INPUT_STYLE),
+        ], style=SIDEBAR_CONTENT_STYLE),
+        
+        html.Div([
+            html.Label(["Yearly Withdrawal Rate:"]),   
+        ], style=SIDEBAR_CONTENT_STYLE),
+        
+        html.Div([
+            dcc.Input(id='wd_rate', value="10%",
+                    style=INPUT_STYLE),
+        ], style=SIDEBAR_CONTENT_STYLE),
+
+        html.Div([
+            html.Label(["Age:"]),   
+        ], style=SIDEBAR_CONTENT_STYLE),
+
+        html.Div([
+            dcc.Dropdown(
                     id="age",
                     options=[x for x in range(1, 120)],
                     value=62,
                     clearable=False,
                     searchable=False,
-                    style=STYLE_SIDE_CONTENT_R),])
-        ]),
-        dbc.Row([
-            dbc.Col([html.Label(["Country of Residence: "], style=STYLE_SIDE_CONTENT_L)]),
-            dbc.Col([dcc.Dropdown(
+                    style=DROPDOWN_STYLE),
+        ], style=SIDEBAR_CONTENT_STYLE),
+
+        html.Div([
+            html.Label(["Country of Residence:"]),   
+        ], style=SIDEBAR_CONTENT_STYLE),
+
+        html.Div([
+            dcc.Dropdown(
                     id="country",
                     options=country_options,
-                    value="Switzerland",
+                    value="America",
                     clearable=False,
                     searchable=True,
-                    style=STYLE_SIDE_CONTENT_R,)])
-        ]),
-        dbc.Row([
-            dbc.Col([html.Label(["Sex: "], style=STYLE_SIDE_CONTENT_L)]),
-            dbc.Col([dcc.Dropdown(
+                    style=DROPDOWN_STYLE),
+        ], style=SIDEBAR_CONTENT_STYLE),
+
+        html.Div([
+            html.Label(["Sex:"]),   
+        ], style=SIDEBAR_CONTENT_STYLE),
+
+        html.Div([
+            dcc.Dropdown(
                     id="sex",
                     options=["Male", "Female"],
                     value="Male",
                     clearable=False,
                     searchable=False,
-                    style=STYLE_SIDE_CONTENT_R,)]),
-        ]),
+                    style=DROPDOWN_STYLE),
+        ], style=SIDEBAR_CONTENT_STYLE),
 
-        dbc.Row([
-            dbc.Col([html.Label(["Index Choice: "], style=STYLE_SIDE_CONTENT_L)]),
-            dbc.Col([dcc.Dropdown(
+        html.Div([
+            html.Label(["Index Choice:"]),   
+        ], style=SIDEBAR_CONTENT_STYLE),
+
+        html.Div([
+            dcc.Dropdown(
                     id="index",
                     options=index_options,
                     value="NDX",
                     clearable=False,
                     searchable=True,
-                    style=STYLE_SIDE_CONTENT_R)]),
-        ]),
+                    style=DROPDOWN_STYLE),
+        ], style=SIDEBAR_CONTENT_STYLE),
 
+        html.Div([
+            html.Label(["Number of Simulations:"]),   
+        ], style=SIDEBAR_CONTENT_STYLE),
 
-        dbc.Row([
-            dbc.Col([html.Label(["Number of Simulations: "], style=STYLE_SIDE_CONTENT_L)]),
-            dbc.Col([dcc.Input(id='sim_n', type='number',
-                  placeholder=5, min=1, max=10000, step=1, value=5,
-                    style=STYLE_SIDE_CONTENT_R)]),
-        ]),
+        html.Div([
+            dcc.Input(
+                id='sim_n', value="5",
+                style=INPUT_STYLE),
+        ], style=SIDEBAR_CONTENT_STYLE),
 
-        dbc.Row([
-            dbc.Col([html.Label(["Years to be Simulated: "], style=STYLE_SIDE_CONTENT_L)]),
-            dbc.Col([dcc.Input(id='sim_years', type='number', 
-                  placeholder=5, min=1, max=100, step=1, value=5,
-                  style=STYLE_SIDE_CONTENT_R)]),
-        ]),
+        html.Div([
+            html.Label(["Years to be Simulated:"]),   
+        ], style=SIDEBAR_CONTENT_STYLE),
+
+        html.Div([
+            dcc.Input(
+                id='sim_years', value="5",
+                style=INPUT_STYLE),
+        ], style=SIDEBAR_CONTENT_STYLE),
+        
 
     ],
     style=SIDEBAR_STYLE,
 )
 
 
+header = html.Div([
+    html.H1("Retirement Portfolio \nWithdrawal Simulation")], style=STYLE_HEADER
+)
 
-# App layout
-app.layout = html.Div([
-
-    dbc.Row(
-        dbc.Col(html.H1("Retirement Portfolio \nWithdrawal Simulation"),
-                    width={'size' : "auto", 'offset' : 0}
-        
-        )
-    
-    , justify="center", style = {'margin-left':'15px', 'margin-top':'15px'}),
-    
-    dbc.Row([
-        sidebar,
-        
-        dbc.Col([
-            # Graph showing the advanced Simulations for further analysis
-            dcc.Graph(id='simulation', figure={}),
-        ], width={'size' : "auto", 'offset' : 0}),
-
-       
-        
-    ]),
-
-
-    # Table showing the aggregated results
-    dash_table.DataTable(id="res_table", data=df.to_dict('records')),
-    html.Br(),
-    
-    
-    html.Br(),
-
-])
+app.layout = html.Div([header, sidebar])
 
 """@callback(
     Output('displayed_text', 'children'),
