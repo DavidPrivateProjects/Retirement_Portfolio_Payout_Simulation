@@ -35,9 +35,9 @@ load_figure_template("SANDSTONE")
 
 # SOURCE: https://community.plotly.com/t/holy-grail-layout-with-dash-bootstrap-components/40818/2
 header_height, footer_height = "6rem", "5rem"
-sidebar_width, adbar_width = "12rem", "12rem"
+sidebar_width, ads_width = "12rem", "12rem"
 
-STYLE_HEADER = {
+HEADER_STYLE = {
     "position" : "fixed",
     "top" : 0,
     "left" : 0,
@@ -55,30 +55,34 @@ SIDEBAR_STYLE = {
     "bottom": footer_height,
     "width": sidebar_width,
     "background-color": "#7C6F66",
-    #"padding": "1rem 1rem",
 }
 
-# the style arguments for the sidebar. We use position:fixed and a fixed width
-DROPDOWN_STYLE = {
+SIDEBAR_DROPDOWN_STYLE = {
     "width": "6.5rem",
     "text-align" : "center",
     "height" : "1.9rem",
-    #"marginLeft": "1.4rem",
     "display": "inline-block"
 }
-INPUT_STYLE = {
+
+SIDEBAR_INPUT_STYLE = {
     "width": "6.5rem",
     "text-align" : "center",
     "height" : "1.8rem",
-    #"marginLeft": "2.7rem",
 }
+
 SIDEBAR_CONTENT_STYLE = {
     "width": "12rem",
     "text-align" : "center"}
 
 FOOTER_STYLE = {
     "position" : "fixed",
-}
+    "bottom" : 0,
+    "left" : 0,
+    "right" : 0,
+    "height" : footer_height,
+    "text-align" : "center",
+    "background-color" : "green",
+} 
 
 CONTENT_STYLE = {
     "margin-left": '5px',
@@ -86,116 +90,130 @@ CONTENT_STYLE = {
     #"padding": "2rem 1rem"
 }
 
-
-sidebar = html.Div(
-    [
-        html.H2("Filters", style={"text-align": "center"}),
-        
-        html.Div([
-            html.Label(["Portfolio Size:"]),
-        ], style=SIDEBAR_CONTENT_STYLE),
-        
-        html.Div([
-            dcc.Input(id='balance', value="100'000 USD",
-                    style=INPUT_STYLE),
-        ], style=SIDEBAR_CONTENT_STYLE),
-        
-        html.Div([
-            html.Label(["Yearly Withdrawal Rate:"]),   
-        ], style=SIDEBAR_CONTENT_STYLE),
-        
-        html.Div([
-            dcc.Input(id='wd_rate', value="10%",
-                    style=INPUT_STYLE),
-        ], style=SIDEBAR_CONTENT_STYLE),
-
-        html.Div([
-            html.Label(["Age:"]),   
-        ], style=SIDEBAR_CONTENT_STYLE),
-
-        html.Div([
-            dcc.Dropdown(
-                    id="age",
-                    options=[x for x in range(1, 120)],
-                    value=62,
-                    clearable=False,
-                    searchable=False,
-                    style=DROPDOWN_STYLE),
-        ], style=SIDEBAR_CONTENT_STYLE),
-
-        html.Div([
-            html.Label(["Country of Residence:"]),   
-        ], style=SIDEBAR_CONTENT_STYLE),
-
-        html.Div([
-            dcc.Dropdown(
-                    id="country",
-                    options=country_options,
-                    value="America",
-                    clearable=False,
-                    searchable=True,
-                    style=DROPDOWN_STYLE),
-        ], style=SIDEBAR_CONTENT_STYLE),
-
-        html.Div([
-            html.Label(["Sex:"]),   
-        ], style=SIDEBAR_CONTENT_STYLE),
-
-        html.Div([
-            dcc.Dropdown(
-                    id="sex",
-                    options=["Male", "Female"],
-                    value="Male",
-                    clearable=False,
-                    searchable=False,
-                    style=DROPDOWN_STYLE),
-        ], style=SIDEBAR_CONTENT_STYLE),
-
-        html.Div([
-            html.Label(["Index Choice:"]),   
-        ], style=SIDEBAR_CONTENT_STYLE),
-
-        html.Div([
-            dcc.Dropdown(
-                    id="index",
-                    options=index_options,
-                    value="NDX",
-                    clearable=False,
-                    searchable=True,
-                    style=DROPDOWN_STYLE),
-        ], style=SIDEBAR_CONTENT_STYLE),
-
-        html.Div([
-            html.Label(["Number of Simulations:"]),   
-        ], style=SIDEBAR_CONTENT_STYLE),
-
-        html.Div([
-            dcc.Input(
-                id='sim_n', value="5",
-                style=INPUT_STYLE),
-        ], style=SIDEBAR_CONTENT_STYLE),
-
-        html.Div([
-            html.Label(["Years to be Simulated:"]),   
-        ], style=SIDEBAR_CONTENT_STYLE),
-
-        html.Div([
-            dcc.Input(
-                id='sim_years', value="5",
-                style=INPUT_STYLE),
-        ], style=SIDEBAR_CONTENT_STYLE),
-        
-
-    ],
-    style=SIDEBAR_STYLE,
-)
-
+ADS_STYLE = {
+    "position" : "fixed",
+    "top" : header_height,
+    "right" : 0,
+    "bottom" : footer_height,
+    "width" : ads_width,
+    "background-color" : "lightblue",
+    "text-align" : "center",
+}
 
 header = html.Div([
-    html.H1("Retirement Portfolio \nWithdrawal Simulation")], style=STYLE_HEADER
-)
+    html.H1("Retirement Portfolio \nWithdrawal Simulation")
+    ], style=HEADER_STYLE)
 
-app.layout = html.Div([header, sidebar])
+footer = html.Div([
+    html.H2("Footer"),
+    html.P("Footer Example Line!"),
+    ], style=FOOTER_STYLE)
+
+ads = html.Div([
+    html.H2("Adds"),
+    html.P("Example Add field"),
+    ], style=ADS_STYLE)
+
+sidebar = html.Div([
+    html.H2("Filters", style={"text-align": "center"}),
+    
+    html.Div([
+        html.Label(["Portfolio Size:"]),
+    ], style=SIDEBAR_CONTENT_STYLE),
+    
+    html.Div([
+        dcc.Input(id='balance', value="100'000 USD",
+                style=SIDEBAR_INPUT_STYLE),
+    ], style=SIDEBAR_CONTENT_STYLE),
+    
+    html.Div([
+        html.Label(["Yearly Withdrawal Rate:"]),   
+    ], style=SIDEBAR_CONTENT_STYLE),
+    
+    html.Div([
+        dcc.Input(id='wd_rate', value="10%",
+                style=SIDEBAR_INPUT_STYLE),
+    ], style=SIDEBAR_CONTENT_STYLE),
+
+    html.Div([
+        html.Label(["Age:"]),   
+    ], style=SIDEBAR_CONTENT_STYLE),
+
+    html.Div([
+        dcc.Dropdown(
+                id="age",
+                options=[x for x in range(1, 120)],
+                value=62,
+                clearable=False,
+                searchable=False,
+                style=SIDEBAR_DROPDOWN_STYLE),
+    ], style=SIDEBAR_CONTENT_STYLE),
+
+    html.Div([
+        html.Label(["Country of Residence:"]),   
+    ], style=SIDEBAR_CONTENT_STYLE),
+
+    html.Div([
+        dcc.Dropdown(
+                id="country",
+                options=country_options,
+                value="America",
+                clearable=False,
+                searchable=True,
+                style=SIDEBAR_DROPDOWN_STYLE),
+    ], style=SIDEBAR_CONTENT_STYLE),
+
+    html.Div([
+        html.Label(["Sex:"]),   
+    ], style=SIDEBAR_CONTENT_STYLE),
+
+    html.Div([
+        dcc.Dropdown(
+                id="sex",
+                options=["Male", "Female"],
+                value="Male",
+                clearable=False,
+                searchable=False,
+                style=SIDEBAR_DROPDOWN_STYLE),
+    ], style=SIDEBAR_CONTENT_STYLE),
+
+    html.Div([
+        html.Label(["Index Choice:"]),   
+    ], style=SIDEBAR_CONTENT_STYLE),
+
+    html.Div([
+        dcc.Dropdown(
+                id="index",
+                options=index_options,
+                value="NDX",
+                clearable=False,
+                searchable=True,
+                style=SIDEBAR_DROPDOWN_STYLE),
+    ], style=SIDEBAR_CONTENT_STYLE),
+
+    html.Div([
+        html.Label(["Number of Simulations:"]),   
+    ], style=SIDEBAR_CONTENT_STYLE),
+
+    html.Div([
+        dcc.Input(
+            id='sim_n', value="5",
+            style=SIDEBAR_INPUT_STYLE),
+    ], style=SIDEBAR_CONTENT_STYLE),
+
+    html.Div([
+        html.Label(["Years to be Simulated:"]),   
+    ], style=SIDEBAR_CONTENT_STYLE),
+
+    html.Div([
+        dcc.Input(
+            id='sim_years', value="5",
+            style=SIDEBAR_INPUT_STYLE),
+    ], style=SIDEBAR_CONTENT_STYLE),
+    ], style=SIDEBAR_STYLE)
+
+
+app.layout = html.Div([header, sidebar, ads, footer])
 
 """@callback(
     Output('displayed_text', 'children'),
