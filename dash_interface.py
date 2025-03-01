@@ -14,7 +14,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from dash import Dash, dcc, html, Input, Output, callback, dash_table
+from dash import Dash, dcc, html, Input, Output, callback, dash_table, State
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
 
@@ -43,18 +43,20 @@ HEADER_STYLE = {
     "left" : 0,
     "right" : 0,
     "height" : header_height,
-    "padding" : "2rem 1rem",
-    "background-color" : "white",
+    "padding" : "1rem 0rem",
+    "background-color" : "#596e79",
+    "text-color" : "white",
     "text-align" : "center",
 }
 
 SIDEBAR_STYLE = {
     "position" : "fixed",
+    "padding" : "0.5rem 0rem",
     "top": header_height,
     "left": 0,
     "bottom": footer_height,
     "width": sidebar_width,
-    "background-color": "#7C6F66",
+    "background-color": "#c7b198",
 }
 
 SIDEBAR_DROPDOWN_STYLE = {
@@ -68,11 +70,13 @@ SIDEBAR_INPUT_STYLE = {
     "width": "6.5rem",
     "text-align" : "center",
     "height" : "1.8rem",
+    "font-size" : "13px",
 }
 
 SIDEBAR_CONTENT_STYLE = {
     "width": "12rem",
-    "text-align" : "center"}
+    "text-align" : "center",
+    "font-size" : "15px",}
 
 FOOTER_STYLE = {
     "position" : "fixed",
@@ -81,13 +85,15 @@ FOOTER_STYLE = {
     "right" : 0,
     "height" : footer_height,
     "text-align" : "center",
-    "background-color" : "green",
+    "background-color" : "#dfd3c3",
 } 
 
 CONTENT_STYLE = {
-    "margin-left": '5px',
-    "margin-right": '5px',
-    #"padding": "2rem 1rem"
+    "margin-top" : header_height,
+    "margin-left" : sidebar_width,
+    "margin-right" : ads_width,
+    "margin-bottom" : footer_height,
+    "background-color" : "#f0ece2",
 }
 
 ADS_STYLE = {
@@ -96,27 +102,37 @@ ADS_STYLE = {
     "right" : 0,
     "bottom" : footer_height,
     "width" : ads_width,
-    "background-color" : "lightblue",
+    "padding" : "0.5rem 0rem",
+    "background-color" : "#c7b198",
     "text-align" : "center",
 }
 
 header = html.Div([
-    html.H1("Retirement Portfolio \nWithdrawal Simulation")
-    ], style=HEADER_STYLE)
+    html.H1("Retirement Portfolio \nWithdrawal Simulation", style={"color" : "white", "font-size" : "40px"})
+], style=HEADER_STYLE)
 
 footer = html.Div([
     html.H2("Footer"),
     html.P("Footer Example Line!"),
-    ], style=FOOTER_STYLE)
+], style=FOOTER_STYLE)
 
 ads = html.Div([
     html.H2("Adds"),
     html.P("Example Add field"),
-    ], style=ADS_STYLE)
+], style=ADS_STYLE)
+
+content_list = [html.H2("Example Content")]
+for i in range(100):
+    content_list.append(html.P(f"LOOK AT THIS {i}"))
+
+content = html.Div(
+    content_list
+, style=CONTENT_STYLE)
+
 
 sidebar = html.Div([
-    html.H2("Filters", style={"text-align": "center"}),
-    
+    html.H2("Filters", style={"text-align": "center", "font-size" : "30px"}),
+
     html.Div([
         html.Label(["Portfolio Size:"]),
     ], style=SIDEBAR_CONTENT_STYLE),
@@ -136,84 +152,109 @@ sidebar = html.Div([
     ], style=SIDEBAR_CONTENT_STYLE),
 
     html.Div([
-        html.Label(["Age:"]),   
+        dbc.Button(
+            "Further Filters",
+            id="collapse-button",
+            className="mb-3",
+            color="primary",
+            n_clicks=0,
+        ),
+        
+        dbc.Collapse(
+            html.Div([html.Div([
+                html.Label(["Age:"]),   
+            ], style=SIDEBAR_CONTENT_STYLE),
+
+            html.Div([
+                dcc.Dropdown(
+                        id="age",
+                        options=[x for x in range(1, 120)],
+                        value=62,
+                        clearable=False,
+                        searchable=False,
+                        style=SIDEBAR_DROPDOWN_STYLE),
+            ], style=SIDEBAR_CONTENT_STYLE),
+
+            html.Div([
+                html.Label(["Country of Residence:"]),   
+            ], style=SIDEBAR_CONTENT_STYLE),
+
+            html.Div([
+                dcc.Dropdown(
+                        id="country",
+                        options=country_options,
+                        value="America",
+                        clearable=False,
+                        searchable=True,
+                        style=SIDEBAR_DROPDOWN_STYLE),
+            ], style=SIDEBAR_CONTENT_STYLE),
+
+            html.Div([
+                html.Label(["Sex:"]),   
+            ], style=SIDEBAR_CONTENT_STYLE),
+
+            html.Div([
+                dcc.Dropdown(
+                        id="sex",
+                        options=["Male", "Female"],
+                        value="Male",
+                        clearable=False,
+                        searchable=False,
+                        style=SIDEBAR_DROPDOWN_STYLE),
+            ], style=SIDEBAR_CONTENT_STYLE),
+
+            html.Div([
+                html.Label(["Index Choice:"]),   
+            ], style=SIDEBAR_CONTENT_STYLE),
+
+            html.Div([
+                dcc.Dropdown(
+                        id="index",
+                        options=index_options,
+                        value="NDX",
+                        clearable=False,
+                        searchable=True,
+                        style=SIDEBAR_DROPDOWN_STYLE),
+            ], style=SIDEBAR_CONTENT_STYLE),
+
+            html.Div([
+                html.Label(["Number of Simulations:"]),   
+            ], style=SIDEBAR_CONTENT_STYLE),
+
+            html.Div([
+                dcc.Input(
+                    id='sim_n', value="5",
+                    style=SIDEBAR_INPUT_STYLE),
+            ], style=SIDEBAR_CONTENT_STYLE),
+
+            html.Div([
+                html.Label(["Years to be Simulated:"]),   
+            ], style=SIDEBAR_CONTENT_STYLE),
+
+            html.Div([
+                dcc.Input(
+                    id='sim_years', value="5",
+                    style=SIDEBAR_INPUT_STYLE),
+            ], style=SIDEBAR_CONTENT_STYLE),]),
+            id="collapse",
+            is_open=False,
+        ),
     ], style=SIDEBAR_CONTENT_STYLE),
 
-    html.Div([
-        dcc.Dropdown(
-                id="age",
-                options=[x for x in range(1, 120)],
-                value=62,
-                clearable=False,
-                searchable=False,
-                style=SIDEBAR_DROPDOWN_STYLE),
-    ], style=SIDEBAR_CONTENT_STYLE),
-
-    html.Div([
-        html.Label(["Country of Residence:"]),   
-    ], style=SIDEBAR_CONTENT_STYLE),
-
-    html.Div([
-        dcc.Dropdown(
-                id="country",
-                options=country_options,
-                value="America",
-                clearable=False,
-                searchable=True,
-                style=SIDEBAR_DROPDOWN_STYLE),
-    ], style=SIDEBAR_CONTENT_STYLE),
-
-    html.Div([
-        html.Label(["Sex:"]),   
-    ], style=SIDEBAR_CONTENT_STYLE),
-
-    html.Div([
-        dcc.Dropdown(
-                id="sex",
-                options=["Male", "Female"],
-                value="Male",
-                clearable=False,
-                searchable=False,
-                style=SIDEBAR_DROPDOWN_STYLE),
-    ], style=SIDEBAR_CONTENT_STYLE),
-
-    html.Div([
-        html.Label(["Index Choice:"]),   
-    ], style=SIDEBAR_CONTENT_STYLE),
-
-    html.Div([
-        dcc.Dropdown(
-                id="index",
-                options=index_options,
-                value="NDX",
-                clearable=False,
-                searchable=True,
-                style=SIDEBAR_DROPDOWN_STYLE),
-    ], style=SIDEBAR_CONTENT_STYLE),
-
-    html.Div([
-        html.Label(["Number of Simulations:"]),   
-    ], style=SIDEBAR_CONTENT_STYLE),
-
-    html.Div([
-        dcc.Input(
-            id='sim_n', value="5",
-            style=SIDEBAR_INPUT_STYLE),
-    ], style=SIDEBAR_CONTENT_STYLE),
-
-    html.Div([
-        html.Label(["Years to be Simulated:"]),   
-    ], style=SIDEBAR_CONTENT_STYLE),
-
-    html.Div([
-        dcc.Input(
-            id='sim_years', value="5",
-            style=SIDEBAR_INPUT_STYLE),
-    ], style=SIDEBAR_CONTENT_STYLE),
-    ], style=SIDEBAR_STYLE)
+], style=SIDEBAR_STYLE)
 
 
-app.layout = html.Div([header, sidebar, ads, footer])
+app.layout = html.Div([header, content, sidebar, ads, footer], style={"font-family" : "Verdana"})
+
+@app.callback(
+    Output("collapse", "is_open"),
+    [Input("collapse-button", "n_clicks")],
+    [State("collapse", "is_open")],
+)
+def toggle_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
 
 """@callback(
     Output('displayed_text', 'children'),
