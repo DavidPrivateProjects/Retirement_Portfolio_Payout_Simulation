@@ -131,6 +131,13 @@ python3 scripts/generate_final_simulation_artifacts.py
 
 ![Final simulation withdrawal sweep](docs/assets/final_simulation_withdrawal_sweep.png)
 
+Additional scenario analysis for interview storytelling:
+
+- [Solution Engineer interview slides](docs/solution_engineer_interview_slides.md)
+- [Scenario metrics CSV](docs/assets/solution_engineer_scenario_insights.csv)
+- [Failure sensitivity chart](docs/assets/solution_engineer_failure_sensitivity.png)
+- [Business value matrix](docs/assets/solution_engineer_business_value_matrix.png)
+
 ## Future improvements
 
 - Add inflation-adjusted withdrawals.
