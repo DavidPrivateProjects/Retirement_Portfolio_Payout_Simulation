@@ -119,15 +119,17 @@ survival_paths = lf.survival_sim(
 └── *.ipynb                 # Exploratory notebooks and end-to-end story drafts
 ```
 
-## Interview talking points
+## Generated simulation artifacts
 
-- Why the simulation separates market paths from withdrawal schedules.
-- Why the dashboard falls back to documented assumptions if Yahoo Finance is not
-  available during a live demo.
-- How deterministic random seeds make tests and presentations reproducible.
-- How the WHO data pipeline is separated from the dashboard so generated files
-  do not need to be committed.
-- What model assumptions would need to change for production-grade planning.
+The repository includes reproducible final simulation images generated with:
+
+```bash
+python3 scripts/generate_final_simulation_artifacts.py
+```
+
+![Final simulation portfolio paths](docs/assets/final_simulation_portfolio_paths.png)
+
+![Final simulation withdrawal sweep](docs/assets/final_simulation_withdrawal_sweep.png)
 
 ## Future improvements
 
