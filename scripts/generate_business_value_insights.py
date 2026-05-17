@@ -299,18 +299,19 @@ def save_failure_sensitivity_chart(sweep_df):
 
 
 def save_business_value_matrix(benchmark_df):
+    comparable_df = benchmark_df[benchmark_df["sim_years"] == 30].copy()
     fig, ax = plt.subplots(figsize=(12, 7))
-    colors = np.where(benchmark_df["market_regime"].eq("Base market"), "#1f77b4", "#c00000")
+    colors = np.where(comparable_df["market_regime"].eq("Base market"), "#1f77b4", "#c00000")
     ax.scatter(
-        benchmark_df["failure_probability"],
-        benchmark_df["median_ending_balance"],
+        comparable_df["failure_probability"],
+        comparable_df["median_ending_balance"],
         s=230,
         c=colors,
         alpha=0.78,
         edgecolor="white",
         linewidth=1.5,
     )
-    for _, row in benchmark_df.iterrows():
+    for _, row in comparable_df.iterrows():
         ax.annotate(
             row["scenario"],
             (row["failure_probability"], row["median_ending_balance"]),
@@ -318,9 +319,9 @@ def save_business_value_matrix(benchmark_df):
             textcoords="offset points",
             fontsize=9,
         )
-    ax.set_title("Business insight: make risk and outcomes visible before decisions are made")
+    ax.set_title("Business insight: compare risk and outcomes on the same 30-year horizon")
     ax.set_xlabel("Portfolio failure probability")
-    ax.set_ylabel("Median ending balance")
+    ax.set_ylabel("Median ending balance at year 30")
     ax.xaxis.set_major_formatter(lambda value, _: f"{value:.0%}")
     ax.yaxis.set_major_formatter(lambda value, _: f"${value:,.0f}")
     ax.grid(alpha=0.25)
@@ -348,11 +349,14 @@ def save_demographic_risk_chart(demographic_df):
 
     fig, ax = plt.subplots(figsize=(12, 7))
     pivot.plot(kind="bar", ax=ax, color=["#1f77b4", "#c00000"], width=0.78)
+    for container in ax.containers:
+        labels = [f"{bar.get_height():.1%}" for bar in container]
+        ax.bar_label(container, labels=labels, padding=3, fontsize=9)
     ax.set_title("Business insight: gender longevity changes the planning horizon")
     ax.set_xlabel("Country, sex, median death age, and long-life planning age")
     ax.set_ylabel("Portfolio failure probability at 4% withdrawal")
     ax.yaxis.set_major_formatter(lambda value, _: f"{value:.0%}")
-    ax.set_ylim(0, 1)
+    ax.set_ylim(0, min(1.0, max(0.2, pivot.to_numpy().max() + 0.12)))
     ax.grid(axis="y", alpha=0.25)
     ax.legend(title="Market assumption")
     ax.tick_params(axis="x", rotation=0)
@@ -431,7 +435,7 @@ paginate: true
 
 ![Business value matrix](assets/business_value_matrix.png)
 
-**What the visualization shows:** each dot is a planning scenario. Moving right means higher failure risk; moving up means a higher median ending balance. The chart helps separate conservative, benchmark, stretch, and stress-test scenarios in one executive-friendly view.
+**What the visualization shows:** each dot is a 30-year planning scenario, so the ending balances are comparable on the same horizon. Moving right means higher failure risk; moving up means a higher median ending balance at year 30. The 40-year early-retirement case is kept in the CSV but intentionally excluded here because ending balances across different time horizons can be misleading.
 
 - A **4% volatile-market stress test** showed **{pct(volatile['failure_probability'])}** failure risk, compared with **{pct(classic['failure_probability'])}** for the base-market 4% benchmark.
 - A **5% lifestyle stretch** raised failure risk to **{pct(stretch['failure_probability'])}** while producing a median ending balance of **{currency(stretch['median_ending_balance'])}**.

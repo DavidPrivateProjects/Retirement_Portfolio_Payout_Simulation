@@ -44,7 +44,7 @@ paginate: true
 
 ![Business value matrix](assets/business_value_matrix.png)
 
-**What the visualization shows:** each dot is a planning scenario. Moving right means higher failure risk; moving up means a higher median ending balance. The chart helps separate conservative, benchmark, stretch, and stress-test scenarios in one executive-friendly view.
+**What the visualization shows:** each dot is a 30-year planning scenario, so the ending balances are comparable on the same horizon. Moving right means higher failure risk; moving up means a higher median ending balance at year 30. The 40-year early-retirement case is kept in the CSV but intentionally excluded here because ending balances across different time horizons can be misleading.
 
 - A **4% volatile-market stress test** showed **65.9%** failure risk, compared with **11.9%** for the base-market 4% benchmark.
 - A **5% lifestyle stretch** raised failure risk to **18.5%** while producing a median ending balance of **$503,306**.
