@@ -6,8 +6,8 @@ A Python portfolio project that explores a practical retirement question:
 > and a simulated investment horizon, how often does the portfolio survive?
 
 The repository combines a small simulation core, a Dash dashboard, and a WHO
-life expectancy data pipeline. It is intentionally transparent enough to discuss
-in interviews: every assumption is visible, testable, and documented.
+life expectancy data pipeline. It is intentionally transparent: every assumption is visible, testable,
+and documented for clear stakeholder conversations.
 
 ## What this project demonstrates
 
@@ -131,12 +131,19 @@ python3 scripts/generate_final_simulation_artifacts.py
 
 ![Final simulation withdrawal sweep](docs/assets/final_simulation_withdrawal_sweep.png)
 
-Additional scenario analysis for interview storytelling:
+Additional business-value scenario analysis:
 
-- [Solution Engineer interview slides](docs/solution_engineer_interview_slides.md)
-- [Scenario metrics CSV](docs/assets/solution_engineer_scenario_insights.csv)
-- [Failure sensitivity chart](docs/assets/solution_engineer_failure_sensitivity.png)
-- [Business value matrix](docs/assets/solution_engineer_business_value_matrix.png)
+```bash
+python3 scripts/generate_business_value_insights.py
+```
+
+- [Business value slides](docs/business_value_slides.md)
+- [Scenario metrics CSV](docs/assets/business_value_scenario_insights.csv)
+- [Failure sensitivity chart](docs/assets/business_value_failure_sensitivity.png)
+- [Demographic risk chart](docs/assets/business_value_demographic_risk.png)
+- [Business value matrix](docs/assets/business_value_matrix.png)
+
+The scenario analysis compares withdrawal rates, market regimes, and longevity-adjusted planning horizons for men and women in the United States and Switzerland.
 
 ## Future improvements
 

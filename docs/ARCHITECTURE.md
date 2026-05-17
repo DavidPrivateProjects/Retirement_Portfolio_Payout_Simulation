@@ -1,6 +1,6 @@
 # Architecture
 
-This project is split into three small, interview-friendly layers:
+This project is split into three small, presentation-friendly layers:
 
 1. **Simulation core**: deterministic and testable portfolio math in
    `stock_movements.py`.

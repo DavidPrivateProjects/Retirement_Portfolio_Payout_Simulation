@@ -148,7 +148,7 @@ controls = dbc.Card(
             ),
             dbc.Button("Run simulation", id="run-simulation", color="primary", className="mt-4 w-100"),
             html.Small(
-                "The graph uses a fixed random seed so interviewers can reproduce the same demo output.",
+                "The graph uses a fixed random seed so stakeholders can reproduce the same demo output.",
                 className="text-muted d-block mt-3",
             ),
         ]
