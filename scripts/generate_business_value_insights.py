@@ -10,8 +10,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy import stats
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import stock_movements as sm
@@ -25,7 +23,7 @@ DAYS_PER_YEAR = 252
 SIMULATIONS = 3_000
 START_BALANCE = 100_000
 RETIREMENT_AGE = 62
-LONGEVITY_PERCENTILE = 0.90
+LONGEVITY_PLANNING_PERCENTILE = 0.90
 
 MARKET_REGIMES = {
     "Base market": {
@@ -44,30 +42,34 @@ DEMOGRAPHIC_SEGMENTS = [
     {
         "country": "United States",
         "sex": "Male",
-        "expected_death_age": 81.7,
-        "life_std": 5.6,
+        "median_death_age": 82.7,
+        "long_life_planning_age": 90,
         "business_context": "US male longevity-adjusted plan",
+        "source_note": "SSA age-62 remaining life expectancy, rounded; long-life age approximates a prudent 90th-percentile planning horizon",
     },
     {
         "country": "United States",
         "sex": "Female",
-        "expected_death_age": 84.6,
-        "life_std": 3.6,
+        "median_death_age": 85.8,
+        "long_life_planning_age": 93,
         "business_context": "US female longevity-adjusted plan",
+        "source_note": "SSA age-62 remaining life expectancy, rounded; long-life age approximates a prudent 90th-percentile planning horizon",
     },
     {
         "country": "Switzerland",
         "sex": "Male",
-        "expected_death_age": 84.5,
-        "life_std": 5.6,
+        "median_death_age": 85.3,
+        "long_life_planning_age": 93,
         "business_context": "Swiss male longevity-adjusted plan",
+        "source_note": "Swiss/OECD age-65 life expectancy context, rounded to retirement-age planning assumptions",
     },
     {
         "country": "Switzerland",
         "sex": "Female",
-        "expected_death_age": 86.3,
-        "life_std": 3.6,
+        "median_death_age": 88.0,
+        "long_life_planning_age": 95,
         "business_context": "Swiss female longevity-adjusted plan",
+        "source_note": "Swiss/OECD age-65 life expectancy context, rounded to retirement-age planning assumptions",
     },
 ]
 
@@ -141,13 +143,8 @@ def pct(value):
 
 
 def planning_horizon(segment):
-    """Convert a demographic life expectancy estimate into a planning horizon."""
-    high_percentile_age = stats.norm.ppf(
-        LONGEVITY_PERCENTILE,
-        loc=segment["expected_death_age"],
-        scale=segment["life_std"],
-    )
-    return int(np.ceil(high_percentile_age - RETIREMENT_AGE))
+    """Convert a demographic long-life age into a portfolio planning horizon."""
+    return int(np.ceil(segment["long_life_planning_age"] - RETIREMENT_AGE))
 
 
 def market_paths(market_regime, sim_years, seed):
@@ -246,14 +243,37 @@ def build_demographic_table():
                         "market_regime": market_regime,
                         "withdrawal_rate": withdrawal_rate,
                         "sim_years": sim_years,
-                        "planning_horizon_source": f"{LONGEVITY_PERCENTILE:.0%} longevity age from demographic assumption",
+                        "planning_horizon_source": f"{LONGEVITY_PLANNING_PERCENTILE:.0%} long-life age from demographic assumption",
                         "business_context": segment["business_context"],
-                        "expected_death_age": segment["expected_death_age"],
-                        "life_std": segment["life_std"],
+                        "median_death_age": segment["median_death_age"],
+                        "long_life_planning_age": segment["long_life_planning_age"],
+                        "source_note": segment["source_note"],
                         **metrics,
                     }
                 )
     return pd.DataFrame(rows)
+
+
+def recommended_withdrawal_by_segment(demographic_df, risk_budget=0.12):
+    """Find the highest tested withdrawal rate that stays within a failure-risk budget."""
+    base = demographic_df[demographic_df["market_regime"] == "Base market"].copy()
+    recommendations = []
+    for (country, sex), group in base.groupby(["country", "sex"]):
+        eligible = group[group["failure_probability"] <= risk_budget].sort_values("withdrawal_rate")
+        if eligible.empty:
+            chosen = group.sort_values("failure_probability").iloc[0]
+        else:
+            chosen = eligible.iloc[-1]
+        recommendations.append(
+            {
+                "country": country,
+                "sex": sex,
+                "recommended_withdrawal_rate": chosen["withdrawal_rate"],
+                "failure_probability": chosen["failure_probability"],
+                "sim_years": int(chosen["sim_years"]),
+            }
+        )
+    return pd.DataFrame(recommendations)
 
 
 def save_failure_sensitivity_chart(sweep_df):
@@ -314,14 +334,22 @@ def save_demographic_risk_chart(demographic_df):
         (demographic_df["withdrawal_rate"] == 0.040)
         & demographic_df["market_regime"].isin(["Base market", "Volatile market"])
     ].copy()
-    selected["segment"] = selected["country"] + "\n" + selected["sex"] + "\n(" + selected["sim_years"].astype(str) + " yrs)"
+    selected["segment"] = (
+        selected["country"]
+        + "\n"
+        + selected["sex"]
+        + "\nmedian "
+        + selected["median_death_age"].map(lambda value: f"{value:.1f}")
+        + " / plan "
+        + selected["long_life_planning_age"].astype(int).astype(str)
+    )
     pivot = selected.pivot(index="segment", columns="market_regime", values="failure_probability")
     pivot = pivot[["Base market", "Volatile market"]]
 
     fig, ax = plt.subplots(figsize=(12, 7))
     pivot.plot(kind="bar", ax=ax, color=["#1f77b4", "#c00000"], width=0.78)
-    ax.set_title("Business insight: demographic longevity changes the planning horizon")
-    ax.set_xlabel("Country, sex, and longevity-adjusted horizon")
+    ax.set_title("Business insight: gender longevity changes the planning horizon")
+    ax.set_xlabel("Country, sex, median death age, and long-life planning age")
     ax.set_ylabel("Portfolio failure probability at 4% withdrawal")
     ax.yaxis.set_major_formatter(lambda value, _: f"{value:.0%}")
     ax.set_ylim(0, 1)
@@ -348,6 +376,14 @@ def write_slide_deck(benchmark_df, sweep_df, demographic_df):
     ].copy()
     lowest_risk = demographic_4.loc[demographic_4["failure_probability"].idxmin()]
     highest_risk = demographic_4.loc[demographic_4["failure_probability"].idxmax()]
+    recommendations = recommended_withdrawal_by_segment(demographic_df)
+    rec_lookup = {
+        (row["country"], row["sex"]): row
+        for _, row in recommendations.iterrows()
+    }
+    us_male_rec = rec_lookup[("United States", "Male")]
+    us_female_rec = rec_lookup[("United States", "Female")]
+    swiss_female_rec = rec_lookup[("Switzerland", "Female")]
 
     deck = f"""---
 marp: true
@@ -358,11 +394,11 @@ paginate: true
 # Retirement Portfolio Simulator
 ## Turning financial uncertainty into explainable planning conversations
 
-**Business problem:** retirees and advisors need a clear way to compare spending goals, market risk, and longevity assumptions before committing to a plan.
+**Business problem:** retirees and advisors need a clear way to compare spending goals, market risk, and longevity assumptions before committing to a plan--especially because women often need assets to last longer and face elevated senior-poverty risk.
 
 **Solution:** a Python + Dash simulator that converts customer assumptions into repeatable scenarios, visual risk metrics, and stakeholder-ready recommendations.
 
-**Why it matters commercially:** the same model can support discovery, suitability conversations, stress testing, and executive-level value storytelling without relying on a black-box answer.
+**Why it matters commercially:** the same model can support discovery, suitability conversations, stress testing, and executive-level value storytelling without relying on a black-box answer. It also shows why one-size-fits-all retirement guidance can under-serve women.
 
 ---
 
@@ -378,15 +414,16 @@ paginate: true
 
 ---
 
-# Insight 2: demographics change the recommendation conversation
+# Insight 2: gender and country change the recommendation conversation
 
 ![Demographic risk](assets/business_value_demographic_risk.png)
 
-**What the visualization shows:** each group represents a country/sex segment. The horizon in parentheses is based on a 90th-percentile longevity planning age, so longer-lived segments are tested over more years. The two bars compare the same 4% withdrawal under base and volatile market assumptions.
+**What the visualization shows:** each group represents a country/sex segment. The label shows both the median/expected death age and the long-life planning age used for the simulation. Women are tested over longer horizons because outliving a median plan is a key driver of senior poverty. The two bars compare the same 4% withdrawal under base and volatile market assumptions.
 
 - At 4% in the base market, the lowest-risk segment was **{lowest_risk['country']} {lowest_risk['sex']}** at **{pct(lowest_risk['failure_probability'])}** simulated failure risk over **{int(lowest_risk['sim_years'])} years**.
 - The highest-risk base-market segment was **{highest_risk['country']} {highest_risk['sex']}** at **{pct(highest_risk['failure_probability'])}** over **{int(highest_risk['sim_years'])} years**.
-- Business value: the solution can personalize guidance by market, country, sex, spending level, and planning horizon instead of presenting one generic rule.
+- Strategy implication: with a **12% failure-risk budget**, the tested US male segment supports **{pct(us_male_rec['recommended_withdrawal_rate'])}**, while the US female segment shifts to **{pct(us_female_rec['recommended_withdrawal_rate'])}** and Swiss female segment shifts to **{pct(swiss_female_rec['recommended_withdrawal_rate'])}**.
+- Business value: the solution can personalize guidance by market, country, sex, spending level, and planning horizon instead of presenting one generic rule. This makes the gender gap in longevity visible before it becomes a poverty-risk problem.
 
 ---
 
@@ -424,7 +461,19 @@ def main():
         (demographic_df["withdrawal_rate"] == 0.040)
         & (demographic_df["market_regime"] == "Base market")
     ]
-    print(demographic_summary[["country", "sex", "sim_years", "failure_probability", "median_ending_balance"]].to_string(index=False))
+    print(
+        demographic_summary[
+            [
+                "country",
+                "sex",
+                "median_death_age",
+                "long_life_planning_age",
+                "sim_years",
+                "failure_probability",
+                "median_ending_balance",
+            ]
+        ].to_string(index=False)
+    )
 
 
 if __name__ == "__main__":

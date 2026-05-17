@@ -143,7 +143,7 @@ python3 scripts/generate_business_value_insights.py
 - [Demographic risk chart](docs/assets/business_value_demographic_risk.png)
 - [Business value matrix](docs/assets/business_value_matrix.png)
 
-The scenario analysis compares withdrawal rates, market regimes, and longevity-adjusted planning horizons for men and women in the United States and Switzerland.
+The scenario analysis compares withdrawal rates, market regimes, and longevity-adjusted planning horizons for men and women in the United States and Switzerland. It explicitly shows why male and female retirement strategies should differ: each segment includes a median/expected death age plus a longer portfolio-planning age, women typically need portfolios to last longer, and under-planning that horizon can increase senior-poverty risk.
 
 ## Future improvements
 

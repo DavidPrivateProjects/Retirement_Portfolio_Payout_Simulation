@@ -7,11 +7,11 @@ paginate: true
 # Retirement Portfolio Simulator
 ## Turning financial uncertainty into explainable planning conversations
 
-**Business problem:** retirees and advisors need a clear way to compare spending goals, market risk, and longevity assumptions before committing to a plan.
+**Business problem:** retirees and advisors need a clear way to compare spending goals, market risk, and longevity assumptions before committing to a plan--especially because women often need assets to last longer and face elevated senior-poverty risk.
 
 **Solution:** a Python + Dash simulator that converts customer assumptions into repeatable scenarios, visual risk metrics, and stakeholder-ready recommendations.
 
-**Why it matters commercially:** the same model can support discovery, suitability conversations, stress testing, and executive-level value storytelling without relying on a black-box answer.
+**Why it matters commercially:** the same model can support discovery, suitability conversations, stress testing, and executive-level value storytelling without relying on a black-box answer. It also shows why one-size-fits-all retirement guidance can under-serve women.
 
 ---
 
@@ -27,15 +27,16 @@ paginate: true
 
 ---
 
-# Insight 2: demographics change the recommendation conversation
+# Insight 2: gender and country change the recommendation conversation
 
 ![Demographic risk](assets/business_value_demographic_risk.png)
 
-**What the visualization shows:** each group represents a country/sex segment. The horizon in parentheses is based on a 90th-percentile longevity planning age, so longer-lived segments are tested over more years. The two bars compare the same 4% withdrawal under base and volatile market assumptions.
+**What the visualization shows:** each group represents a country/sex segment. The label shows both the median/expected death age and the long-life planning age used for the simulation. Women are tested over longer horizons because outliving a median plan is a key driver of senior poverty. The two bars compare the same 4% withdrawal under base and volatile market assumptions.
 
-- At 4% in the base market, the lowest-risk segment was **United States Male** at **10.4%** simulated failure risk over **27 years**.
-- The highest-risk base-market segment was **Switzerland Female** at **12.3%** over **29 years**.
-- Business value: the solution can personalize guidance by market, country, sex, spending level, and planning horizon instead of presenting one generic rule.
+- At 4% in the base market, the lowest-risk segment was **United States Male** at **10.9%** simulated failure risk over **28 years**.
+- The highest-risk base-market segment was **Switzerland Female** at **13.9%** over **33 years**.
+- Strategy implication: with a **12% failure-risk budget**, the tested US male segment supports **4.0%**, while the US female segment shifts to **3.5%** and Swiss female segment shifts to **3.5%**.
+- Business value: the solution can personalize guidance by market, country, sex, spending level, and planning horizon instead of presenting one generic rule. This makes the gender gap in longevity visible before it becomes a poverty-risk problem.
 
 ---
 
