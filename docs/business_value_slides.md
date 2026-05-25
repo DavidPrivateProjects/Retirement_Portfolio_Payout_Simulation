@@ -1,8 +1,3 @@
----
-marp: true
-title: Retirement Portfolio Simulator - Business Value Story
-paginate: true
----
 
 # Retirement Portfolio Simulator
 ## Turning financial uncertainty into explainable planning conversations
